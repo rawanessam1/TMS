@@ -24,5 +24,3 @@ app.get("/health", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-// squash test
-// feature2 test update
