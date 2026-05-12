@@ -2,51 +2,49 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      # ---------- BACKEND ----------
       - name: Set up Node.js for Backend
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'backend/package-lock.json'
-        
-      - name: Install Backend Dependencies
-        working-directory: ./backend
-        run: npm ci || npm install
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "pern-mcp-starter/backend/package-lock.json"
 
+      - name: Install Backend Dependencies
+        working-directory: ./pern-mcp-starter/backend
+        run: npm ci
+
+      # ---------- FRONTEND ----------
       - name: Set up Node.js for Frontend
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "pern-mcp-starter/frontend/package-lock.json"
 
       - name: Install Frontend Dependencies
-        working-directory: ./frontend
-        run: npm ci || npm install
+        working-directory: ./pern-mcp-starter/frontend
+        run: npm ci
 
       - name: Build Frontend
-        working-directory: ./frontend
+        working-directory: ./pern-mcp-starter/frontend
         run: npm run build
 
+      # ---------- DOCKER ----------
       - name: Validate docker-compose syntax
-        run: docker-compose config -q
-
-      # In a real scenario, you'd add steps here for running tests:
-      # - name: Run Backend Tests
-      #   working-directory: ./backend
-      #   run: npm test
-      # 
-      # - name: Build Docker Images (Dry Run)
-      #   run: docker-compose build
+        working-directory: ./pern-mcp-starter
+        run: docker compose config -q
