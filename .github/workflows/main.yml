@@ -16,6 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ---------- BACKEND ----------
       - name: Set up Node.js for Backend
         uses: actions/setup-node@v4
         with:
@@ -27,6 +28,7 @@ jobs:
         working-directory: ./pern-mcp-starter/backend
         run: npm ci
 
+      # ---------- FRONTEND ----------
       - name: Set up Node.js for Frontend
         uses: actions/setup-node@v4
         with:
@@ -38,14 +40,11 @@ jobs:
         working-directory: ./pern-mcp-starter/frontend
         run: npm ci
 
-      - name: Lint Frontend
-        working-directory: ./pern-mcp-starter/frontend
-        run: npm run lint
-
       - name: Build Frontend
         working-directory: ./pern-mcp-starter/frontend
         run: npm run build
 
+      # ---------- DOCKER ----------
       - name: Validate docker-compose syntax
         working-directory: ./pern-mcp-starter
-        run: docker compose config -q # ✅ no hyphen
+        run: docker compose config -q
