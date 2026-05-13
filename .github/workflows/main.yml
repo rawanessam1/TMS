@@ -43,10 +43,13 @@ jobs:
       - name: Validate docker-compose syntax
         run: docker-compose config -q
 
-      # In a real scenario, you'd add steps here for running tests:
-      # - name: Run Backend Tests
-      #   working-directory: ./backend
-      #   run: npm test
-      # 
-      # - name: Build Docker Images (Dry Run)
-      #   run: docker-compose build
+      # --- الجزء الجديد الخاص بـ Netlify ---
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: 'frontend/dist'
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
