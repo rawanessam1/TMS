@@ -1,9 +1,9 @@
 [build]
-  publish = "dist"
+  base    = "pern-mcp-starter/frontend"
   command = "npm run build"
+  publish = "dist"
 
-# Fallback routing for Single Page Application
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from   = "/*"
+  to     = "/index.html"
   status = 200
