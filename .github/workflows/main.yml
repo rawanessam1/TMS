@@ -2,52 +2,79 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  build-and-test:
+  # ─────────────────────────────────────────────────────────────
+  # CI — Install, Build & Validate
+  # ─────────────────────────────────────────────────────────────
+  ci:
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js for Backend
-        uses: actions/setup-node@v3
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'backend/package-lock.json'
-        
-      - name: Install Backend Dependencies
-        working-directory: ./backend
-        run: npm ci || npm install
+          node-version: "18"
 
-      - name: Set up Node.js for Frontend
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+      # ── Backend ───────────────────────────────────────────────
+      - name: Install Backend dependencies
+        working-directory: pern-mcp-starter/backend
+        run: npm ci
 
-      - name: Install Frontend Dependencies
-        working-directory: ./frontend
-        run: npm ci || npm install
+      # Uncomment when you have backend tests:
+      # - name: Run Backend tests
+      #   working-directory: pern-mcp-starter/backend
+      #   run: npm test
+
+      # ── Frontend ──────────────────────────────────────────────
+      - name: Install Frontend dependencies
+        working-directory: pern-mcp-starter/frontend
+        run: npm ci
 
       - name: Build Frontend
-        working-directory: ./frontend
+        working-directory: pern-mcp-starter/frontend
         run: npm run build
 
+      # ── Docker Compose validation ─────────────────────────────
       - name: Validate docker-compose syntax
-        run: docker-compose config -q
+        working-directory: pern-mcp-starter
+        run: docker compose config -q
 
-      # --- الجزء الجديد الخاص بـ Netlify ---
+      # ── Pass the build to the deploy job ─────────────────────
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: pern-mcp-starter/frontend/dist/
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────────
+  # CD — Deploy to Netlify (main branch pushes only)
+  # ─────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Netlify
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
-          publish-dir: 'frontend/dist'
+          publish-dir: dist/
           production-deploy: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
