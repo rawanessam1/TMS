@@ -78,7 +78,7 @@ function App() {
       <div className="max-w-3xl mx-auto px-4">
         <header className="mb-8 text-center">
           <h1 className="text-4xl font-extrabold text-indigo-600 mb-2">
-            PERN Task Managerr
+            PERN Task Managerrr
           </h1>
           <p className="text-gray-600">
             PostgreSQL + Express + React + Node.js (with MCP Support)
